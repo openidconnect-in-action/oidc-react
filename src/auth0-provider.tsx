@@ -4,16 +4,24 @@ import React, {
   useReducer,
   useState,
 } from 'react';
-import { Auth0Client, Auth0ClientOptions } from '@auth0/auth0-spa-js';
+import {
+  Auth0Client,
+  Auth0ClientOptions,
+  GetTokenSilentlyOptions,
+  GetTokenWithPopupOptions,
+  PopupLoginOptions,
+  RedirectLoginOptions,
+} from '@auth0/auth0-spa-js';
 import Auth0Context from './auth0-context';
 import {
   AppState,
   defaultOnRedirectCallback,
   loginError,
   hasAuthParams,
+  wrappedLoginWithPopup,
 } from './utils';
-import { reducer } from './reducer';
-import { initialAuthState } from './auth-state';
+import { authReducer } from './auth-reducer';
+import { initialAuthState } from './auth-reducer';
 
 export interface Auth0ProviderOptions
   extends PropsWithChildren<Auth0ClientOptions> {
@@ -26,7 +34,7 @@ const Auth0Provider = ({
   ...opts
 }: Auth0ProviderOptions): JSX.Element => {
   const [client] = useState(() => new Auth0Client(opts));
-  const [state, dispatch] = useReducer(reducer, initialAuthState);
+  const [state, dispatch] = useReducer(authReducer, initialAuthState);
 
   useEffect(() => {
     (async (): Promise<void> => {
@@ -54,8 +62,14 @@ const Auth0Provider = ({
     <Auth0Context.Provider
       value={{
         ...state,
-        getToken: (opts): Promise<string> => client.getTokenSilently(opts),
-        login: (opts): Promise<void> => client.loginWithRedirect(opts),
+        getToken: (opts?: GetTokenSilentlyOptions): Promise<string> =>
+          client.getTokenSilently(opts),
+        getTokenWithPopup: (opts?: GetTokenWithPopupOptions): Promise<string> =>
+          client.getTokenWithPopup(opts),
+        login: (opts?: RedirectLoginOptions): Promise<void> =>
+          client.loginWithRedirect(opts),
+        loginWithPopup: (opts?: PopupLoginOptions): Promise<void> =>
+          wrappedLoginWithPopup(client, dispatch, opts),
         logout: (opts): void => client.logout(opts),
       }}
     >

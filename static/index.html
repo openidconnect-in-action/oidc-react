@@ -23,17 +23,29 @@
     <script src="https://cdn.auth0.com/js/auth0-spa-js/1.7/auth0-spa-js.production.js"></script>
     <script src="auth0-react.js"></script>
     <script type="text/babel">
-      const { Auth0Provider, useAuth0 } = reactAuth0;
+      const { Auth0Provider, useAuth0, useToken } = reactAuth0;
 
       const App = () => {
         const { isAuthenticated, isLoading, login, logout } = useAuth0();
+        const { token, isLoading: isTokenLoading } = useToken();
+        const {
+          token: anotherToken,
+          isLoading: isAnotherTokenLoading,
+        } = useToken({
+          audience: 'http://localhost/',
+          scope: 'read:users',
+        });
 
-        if (isLoading) {
+        if (isLoading || isTokenLoading || isAnotherTokenLoading) {
           return <div>loading...</div>;
         }
 
         return isAuthenticated ? (
-          <button onClick={() => logout()}>logout</button>
+          <div>
+            <button onClick={() => logout()}>logout</button>
+            <div>token: {token}</div>
+            <div>another token: {anotherToken}</div>
+          </div>
         ) : (
           <button onClick={() => login()}>Login</button>
         );
