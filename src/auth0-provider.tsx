@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer, useState } from 'react';
+import React, { useCallback, useEffect, useReducer, useState } from 'react';
 import {
   Auth0Client,
   Auth0ClientOptions,
@@ -30,6 +30,11 @@ export interface Auth0ProviderOptions {
    * The child nodes your Provider has wrapped
    */
   children?: React.ReactNode;
+  /**
+   * Used in special cases where you want to handle the redirect callback yourself rather than relying on the library to do it.
+   * This is usually to workaround having multiple oauth clients on the same page.
+   */
+  skipHandleCallback?: boolean;
   /**
    * By default this removes the code and state parameters from the url when you are redirected from the authorize page.
    * It uses `window.history` but you might want to overwrite this if you are using a custom router, like `react-router-dom`
@@ -189,25 +194,51 @@ const Auth0Provider = (opts: Auth0ProviderOptions): JSX.Element => {
   const [client] = useState(
     () => new Auth0Client(toAuth0ClientOptions(clientOpts))
   );
-  const [state, dispatch] = useReducer(reducer, initialAuthState);
+  const [state, dispatch] = useReducer(reducer, {
+    ...initialAuthState,
+    isLoadingHandleCallback: opts.skipHandleCallback
+      ? false
+      : initialAuthState.isLoadingHandleCallback,
+  });
+
+  const handleRedirectCallback = useCallback(async (): Promise<void> => {
+    dispatch({ type: 'HANDLE_REDIRECT_CALLBACK_STARTED' });
+    const { appState } = await client.handleRedirectCallback();
+    onRedirectCallback(appState);
+    const isAuthenticated = await client.isAuthenticated();
+    const user = await client.getUser();
+    dispatch({
+      type: 'HANDLE_REDIRECT_CALLBACK_COMPLETE',
+      isAuthenticated,
+      user,
+    });
+  }, [client, onRedirectCallback]);
+
+  const checkSession = useCallback(async (): Promise<void> => {
+    dispatch({ type: 'CHECK_SESSION_STARTED' });
+    await client.checkSession();
+    const isAuthenticated = await client.isAuthenticated();
+    const user = await client.getUser();
+    dispatch({
+      type: 'CHECK_SESSION_CALLBACK_COMPLETE',
+      isAuthenticated,
+      user,
+    });
+  }, [client]);
 
   useEffect(() => {
     (async (): Promise<void> => {
       try {
         if (hasAuthParams()) {
-          const { appState } = await client.handleRedirectCallback();
-          onRedirectCallback(appState);
+          await handleRedirectCallback();
         } else {
-          await client.checkSession();
+          await checkSession();
         }
-        const isAuthenticated = await client.isAuthenticated();
-        const user = isAuthenticated && (await client.getUser());
-        dispatch({ type: 'INITIALISED', isAuthenticated, user });
       } catch (error) {
         dispatch({ type: 'ERROR', error: loginError(error) });
       }
     })();
-  }, [client, onRedirectCallback]);
+  }, [checkSession, handleRedirectCallback]);
 
   const loginWithPopup = async (
     options?: PopupLoginOptions,
@@ -232,10 +263,19 @@ const Auth0Provider = (opts: Auth0ProviderOptions): JSX.Element => {
     }
   };
 
+  const {
+    isLoadingHandleCallback,
+    isLoadingCheckSession,
+    isPopupOpen,
+    ...props
+  } = state;
+
   return (
     <Auth0Context.Provider
       value={{
-        ...state,
+        ...props,
+        isLoading:
+          isLoadingHandleCallback || isLoadingCheckSession || isPopupOpen,
         getAccessTokenSilently: wrappedGetToken((opts?) =>
           client.getTokenSilently(opts)
         ),

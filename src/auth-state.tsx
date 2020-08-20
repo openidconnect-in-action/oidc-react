@@ -6,15 +6,21 @@ export type User = any; // eslint-disable-line @typescript-eslint/no-explicit-an
 export interface AuthState {
   error?: Error;
   isAuthenticated: boolean;
-  isLoading: boolean;
+  isLoadingHandleCallback: boolean;
+  isLoadingCheckSession: boolean;
+  isPopupOpen: boolean;
   user?: User;
 }
+
+// In SSR mode the library will never check the session, so loading should be initialised as false
+const isLoading = typeof window !== 'undefined';
 
 /**
  * The initial auth state.
  */
 export const initialAuthState: AuthState = {
   isAuthenticated: false,
-  // In SSR mode the library will never check the session, so loading should be initialised as false
-  isLoading: typeof window !== 'undefined',
+  isLoadingHandleCallback: isLoading,
+  isLoadingCheckSession: isLoading,
+  isPopupOpen: false,
 };

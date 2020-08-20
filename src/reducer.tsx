@@ -1,9 +1,14 @@
 import { AuthState, User } from './auth-state';
 
 type Action =
+  | { type: 'HANDLE_REDIRECT_CALLBACK_STARTED' }
+  | { type: 'CHECK_SESSION_STARTED' }
   | { type: 'LOGIN_POPUP_STARTED' }
   | {
-      type: 'INITIALISED' | 'LOGIN_POPUP_COMPLETE';
+      type:
+        | 'CHECK_SESSION_CALLBACK_COMPLETE'
+        | 'HANDLE_REDIRECT_CALLBACK_COMPLETE'
+        | 'LOGIN_POPUP_COMPLETE';
       isAuthenticated: boolean;
       user?: User;
     }
@@ -18,15 +23,40 @@ export const reducer = (state: AuthState, action: Action): AuthState => {
     case 'LOGIN_POPUP_STARTED':
       return {
         ...state,
-        isLoading: true,
+        isPopupOpen: true,
+      };
+    case 'HANDLE_REDIRECT_CALLBACK_STARTED':
+      return {
+        ...state,
+        isLoadingHandleCallback: true,
+      };
+    case 'CHECK_SESSION_STARTED':
+      return {
+        ...state,
+        isLoadingCheckSession: true,
       };
     case 'LOGIN_POPUP_COMPLETE':
-    case 'INITIALISED':
       return {
         ...state,
         isAuthenticated: action.isAuthenticated,
         user: action.user,
-        isLoading: false,
+        isPopupOpen: false,
+        error: undefined,
+      };
+    case 'CHECK_SESSION_CALLBACK_COMPLETE':
+      return {
+        ...state,
+        isAuthenticated: action.isAuthenticated,
+        user: action.user,
+        isLoadingCheckSession: false,
+        error: undefined,
+      };
+    case 'HANDLE_REDIRECT_CALLBACK_COMPLETE':
+      return {
+        ...state,
+        isAuthenticated: action.isAuthenticated,
+        user: action.user,
+        isLoadingHandleCallback: false,
         error: undefined,
       };
     case 'LOGOUT':
@@ -38,7 +68,10 @@ export const reducer = (state: AuthState, action: Action): AuthState => {
     case 'ERROR':
       return {
         ...state,
-        isLoading: false,
+        // TODO: might need separate errors for each loading type
+        isLoadingHandleCallback: false,
+        isLoadingCheckSession: false,
+        isPopupOpen: false,
         error: action.error,
       };
   }

@@ -34,7 +34,16 @@ export interface RedirectLoginOptions extends BaseLoginOptions {
 /**
  * Contains the authenticated state and authentication methods provided by the `useAuth0` hook.
  */
-export interface Auth0ContextInterface extends AuthState {
+export interface Auth0ContextInterface
+  extends Omit<
+    AuthState,
+    'isLoadingHandleCallback' | 'isLoadingCheckSession' | 'isPopupOpen'
+  > {
+  /**
+   * `true` if the SDK is still checking the Auth0 session or still doing the code exchange in the redirect handler.
+   */
+  isLoading: boolean;
+
   /**
    * ```js
    * const token = await getAccessTokenSilently(options);
@@ -144,8 +153,19 @@ const stub = (): never => {
 /**
  * @ignore
  */
+const {
+  isAuthenticated,
+  isLoadingHandleCallback,
+  isLoadingCheckSession,
+  isPopupOpen,
+} = initialAuthState;
+
+/**
+ * @ignore
+ */
 const initialContext = {
-  ...initialAuthState,
+  isAuthenticated,
+  isLoading: isLoadingHandleCallback || isLoadingCheckSession || isPopupOpen,
   getAccessTokenSilently: stub,
   getAccessTokenWithPopup: stub,
   getIdTokenClaims: stub,
