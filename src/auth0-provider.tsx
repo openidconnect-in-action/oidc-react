@@ -8,9 +8,10 @@ import {
   PopupLoginOptions,
   PopupConfigOptions,
   RedirectLoginOptions as Auth0RedirectLoginOptions,
+  GetTokenSilentlyOptions,
 } from '@auth0/auth0-spa-js';
 import Auth0Context, { RedirectLoginOptions } from './auth0-context';
-import { hasAuthParams, loginError, wrappedGetToken } from './utils';
+import { hasAuthParams, loginError, tokenError } from './utils';
 import { reducer } from './reducer';
 import { initialAuthState } from './auth-state';
 
@@ -201,7 +202,7 @@ const Auth0Provider = (opts: Auth0ProviderOptions): JSX.Element => {
           await client.checkSession();
         }
         const user = await client.getUser();
-        dispatch({ type: 'INITIALISED', isAuthenticated: !!user, user });
+        dispatch({ type: 'INITIALISED', user });
       } catch (error) {
         dispatch({ type: 'ERROR', error: loginError(error) });
       }
@@ -220,7 +221,7 @@ const Auth0Provider = (opts: Auth0ProviderOptions): JSX.Element => {
       return;
     }
     const user = await client.getUser();
-    dispatch({ type: 'LOGIN_POPUP_COMPLETE', isAuthenticated: !!user, user });
+    dispatch({ type: 'LOGIN_POPUP_COMPLETE', user });
   };
 
   const logout = (opts: LogoutOptions = {}): void => {
@@ -230,16 +231,41 @@ const Auth0Provider = (opts: Auth0ProviderOptions): JSX.Element => {
     }
   };
 
+  const getAccessTokenSilently = async (
+    opts?: GetTokenSilentlyOptions
+  ): Promise<string> => {
+    let token;
+    try {
+      token = await client.getTokenSilently(opts);
+    } catch (error) {
+      throw tokenError(error);
+    }
+    const user = await client.getUser();
+    dispatch({ type: 'GET_TOKEN_COMPLETE', user });
+    return token;
+  };
+
+  const getAccessTokenWithPopup = async (
+    opts?: GetTokenSilentlyOptions,
+    config?: PopupConfigOptions
+  ): Promise<string> => {
+    let token;
+    try {
+      token = await client.getTokenWithPopup(opts, config);
+    } catch (error) {
+      throw tokenError(error);
+    }
+    const user = await client.getUser();
+    dispatch({ type: 'GET_TOKEN_COMPLETE', user });
+    return token;
+  };
+
   return (
     <Auth0Context.Provider
       value={{
         ...state,
-        getAccessTokenSilently: wrappedGetToken((opts?) =>
-          client.getTokenSilently(opts)
-        ),
-        getAccessTokenWithPopup: wrappedGetToken((opts?) =>
-          client.getTokenWithPopup(opts)
-        ),
+        getAccessTokenSilently,
+        getAccessTokenWithPopup,
         getIdTokenClaims: (opts): Promise<IdToken> =>
           client.getIdTokenClaims(opts),
         loginWithRedirect: (opts): Promise<void> =>
