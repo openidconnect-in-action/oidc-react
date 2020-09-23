@@ -1,5 +1,5 @@
 import React, { ComponentType, useEffect, FC } from 'react';
-import { RedirectLoginOptions } from '@auth0/auth0-spa-js';
+import { RedirectLoginOptions } from '@facilelogin/oidc-spa-js';
 import useAuth0 from './use-auth0';
 
 /**

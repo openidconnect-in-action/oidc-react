@@ -9,7 +9,7 @@ import replace from '@rollup/plugin-replace';
 import pkg from './package.json';
 
 const isProduction = process.env.NODE_ENV === 'production';
-const name = 'reactAuth0';
+const name = 'react-oidc';
 const input = 'src/index.tsx';
 const globals = {
   react: 'React',
@@ -29,7 +29,7 @@ export default [
     output: [
       {
         name,
-        file: 'dist/auth0-react.js',
+        file: 'dist/oidc-react.js',
         format: 'umd',
         globals,
         sourcemap: true,
@@ -56,7 +56,7 @@ export default [
           output: [
             {
               name,
-              file: 'dist/auth0-react.min.js',
+              file: 'dist/oidc-react.min.js',
               format: 'umd',
               globals,
               sourcemap: true,

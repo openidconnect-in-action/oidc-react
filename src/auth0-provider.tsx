@@ -8,7 +8,7 @@ import {
   PopupLoginOptions,
   PopupConfigOptions,
   RedirectLoginOptions as Auth0RedirectLoginOptions,
-} from '@auth0/auth0-spa-js';
+} from '@facilelogin/oidc-spa-js';
 import Auth0Context, { RedirectLoginOptions } from './auth0-context';
 import { hasAuthParams, loginError, wrappedGetToken } from './utils';
 import { reducer } from './reducer';
@@ -132,14 +132,21 @@ declare const __VERSION__: string;
 const toAuth0ClientOptions = (
   opts: Auth0ProviderOptions
 ): Auth0ClientOptions => {
-  const { clientId, redirectUri, maxAge, tokenEp, authzEp, ...validOpts } = opts;
+  const {
+    clientId,
+    redirectUri,
+    maxAge,
+    tokenEp,
+    authzEp,
+    ...validOpts
+  } = opts;
   console.log(`AUTZH EP: ${authzEp}`);
   return {
     ...validOpts,
     client_id: clientId,
     redirect_uri: redirectUri,
-    authz_ep : authzEp,
-    token_ep : tokenEp,
+    authz_ep: authzEp,
+    token_ep: tokenEp,
     max_age: maxAge,
     auth0Client: {
       name: 'auth0-react',
@@ -197,7 +204,7 @@ const Auth0Provider = (opts: Auth0ProviderOptions): JSX.Element => {
     () => new Auth0Client(toAuth0ClientOptions(clientOpts))
   );
   const [state, dispatch] = useReducer(reducer, initialAuthState);
-  
+
   useEffect(() => {
     (async (): Promise<void> => {
       try {

@@ -1,7 +1,7 @@
 import {
   GetTokenSilentlyOptions,
   GetTokenWithPopupOptions,
-} from '@auth0/auth0-spa-js';
+} from '@facilelogin/oidc-spa-js';
 import { OAuthError } from './errors';
 
 const CODE_RE = /[?&]code=[^&]+/;

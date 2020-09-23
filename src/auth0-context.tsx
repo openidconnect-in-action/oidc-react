@@ -7,7 +7,7 @@ import {
   LogoutOptions,
   PopupLoginOptions,
   PopupConfigOptions,
-} from '@auth0/auth0-spa-js';
+} from '@facilelogin/oidc-spa-js';
 import { createContext } from 'react';
 import { AuthState, initialAuthState } from './auth-state';
 

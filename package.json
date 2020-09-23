@@ -1,7 +1,7 @@
 {
   "author": "FacileLogin",
   "name": "@facilelogin/oidc-react",
-  "version": "1.1.0",
+  "version": "1.0.1",
   "description": "OIDC SDK for React Single Page Applications (SPA)",
   "keywords": [
     "oidc",
@@ -23,7 +23,6 @@
     "build": "npm run lint && rollup -c --environment NODE_ENV:production",
     "lint": "eslint --ext=tsx ./src ./__tests__",
     "start": "rollup -cw",
-    "test": "jest --coverage",
     "prepack": "npm run test && npm run build",
     "docs": "typedoc --options typedoc.js src node_modules/@facilelogin/oidc-spa-js/dist/typings/global.d.ts",
     "install:examples": "npm i --prefix=examples/cra-react-router --no-package-lock; npm i --prefix=examples/gatsby-app --no-package-lock; npm i --prefix=examples/nextjs-app --no-package-lock; npm ci --prefix=examples/users-api",
@@ -31,13 +30,6 @@
     "start:gatsby": "npm start --prefix=examples/gatsby-app",
     "start:nextjs": "npm run dev --prefix=examples/nextjs-app",
     "start:api": "npm start --prefix=examples/users-api",
-    "test:cra": "start-server-and-test start:api 3001 start:cra 3000 cypress:run",
-    "test:cra:watch": "start-server-and-test start:api 3001 start:cra 3000 cypress:open",
-    "test:gatsby": "start-server-and-test start:api 3001 start:gatsby 3000 cypress:run",
-    "test:gatsby:watch": "start-server-and-test start:api 3001 start:gatsby 3000 cypress:open",
-    "test:nextjs": "start-server-and-test start:api 3001 start:nextjs 3000 cypress:run",
-    "test:nextjs:watch": "start-server-and-test start:api 3001 start:nextjs 3000 cypress:open",
-    "test:integration": "npm run test:cra; npm run test:gatsby; npm run test:nextjs",
     "cypress:run": "cypress run",
     "cypress:open": "cypress open",
     "codecov": "codecov"
@@ -98,6 +90,6 @@
     }
   },
   "dependencies": {
-    "@facilelogin/oidc-spa-js": "^1.12.1"
+    "@facilelogin/oidc-spa-js": "^1.0.1"
   }
 }

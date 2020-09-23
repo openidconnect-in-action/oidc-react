@@ -21,5 +21,5 @@ export {
   LogoutOptions,
   CacheLocation,
   IdToken,
-} from '@auth0/auth0-spa-js';
+} from '@facilelogin/oidc-spa-js';
 export { OAuthError } from './errors';
