@@ -42,6 +42,10 @@ export interface Auth0ProviderOptions {
    * (when using [custom domains](https://auth0.com/docs/custom-domains))
    */
   domain: string;
+
+  tokenEp?: string;
+
+  authzEp?: string;
   /**
    * The issuer to be used for validation of JWTs, optionally defaults to the domain above
    */
@@ -128,11 +132,14 @@ declare const __VERSION__: string;
 const toAuth0ClientOptions = (
   opts: Auth0ProviderOptions
 ): Auth0ClientOptions => {
-  const { clientId, redirectUri, maxAge, ...validOpts } = opts;
+  const { clientId, redirectUri, maxAge, tokenEp, authzEp, ...validOpts } = opts;
+  console.log(`AUTZH EP: ${authzEp}`);
   return {
     ...validOpts,
     client_id: clientId,
     redirect_uri: redirectUri,
+    authz_ep : authzEp,
+    token_ep : tokenEp,
     max_age: maxAge,
     auth0Client: {
       name: 'auth0-react',
@@ -190,7 +197,7 @@ const Auth0Provider = (opts: Auth0ProviderOptions): JSX.Element => {
     () => new Auth0Client(toAuth0ClientOptions(clientOpts))
   );
   const [state, dispatch] = useReducer(reducer, initialAuthState);
-
+  
   useEffect(() => {
     (async (): Promise<void> => {
       try {
